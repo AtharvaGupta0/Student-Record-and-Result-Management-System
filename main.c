@@ -22,12 +22,14 @@ struct StudentInfo studentrecords[100];
 // Functions Initialisation
 
 void addStudent();
+#include <stdio.h>
+
+void clrscreen(void);
 
 // Main function
 
 int main() {
   printf("Welcome to Student Record and Result Management System\n");
-  addStudent();
 }
 
 // Function Defination
@@ -48,4 +50,11 @@ void addStudent() {
     }
   } while (studentrecords[RecordCount].SapId < 590000000 ||
            studentrecords[RecordCount].SapId > 590099999);
+}
+
+void clrscreen(void) {
+  {
+    printf("\033[2J\033[H");
+    fflush(stdout);
+  }
 }
