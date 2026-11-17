@@ -32,6 +32,10 @@ Student-Record-and-Result-Management-System/
 ├── Executables/
 │   ├── Student-Record-and-Management-System      (Linux)
 │   └── Student-Record-and-Management-System.exe  (Windows)
+├── tests/
+│   ├── sample_input.txt
+│   ├── sample_output.txt
+│   └── README.md
 ├── AI_USAGE_LOG.md
 └── README.md
 ```
@@ -86,6 +90,20 @@ Windows cmd:
 ```cmd
 Executables\Student-Record-and-Management-System.exe
 ```
+
+## Tests
+
+`tests/` contains a scripted sample session:
+
+- `tests/sample_input.txt` - the keystrokes for the session
+- `tests/sample_output.txt` - the output captured from that session
+- `tests/README.md` - what the session covers and how to reproduce it
+
+The session adds two students, shows validation rejecting an invalid SGPA,
+searches by name prefix, calculates a CGPA, runs the academic advisor, and
+displays the records sorted by name. Run it in a temporary directory so the
+data file in `DataFiles/` is not changed; the exact commands are in
+`tests/README.md`.
 
 ## Menu
 
