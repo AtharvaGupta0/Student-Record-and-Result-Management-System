@@ -13,6 +13,11 @@ enum Year {
   FOURTH_YEAR
 };
 
+enum SortField {
+  SORT_BY_SAP_ID,
+  SORT_BY_NAME
+};
+
 struct StudentInfo {
   int SapId;
   int RollNo;
@@ -28,6 +33,8 @@ struct StudentInfo {
 
 #define DATA "DataFiles/students.dat"
 #define MAX_STUDENTS 1000
+#define SAP_MIN 590000000
+#define SAP_MAX 590099999
 
 // Global Variable Declaration
 
@@ -50,9 +57,9 @@ void academicAdvisor(float cgpa);
 void showAcademicAdvisor(void);
 void displayAverageCGPAByYear(void);
 void deleteStudentRecord(void);
-void displaySortedBySapId(void);
-void displaySortedByName(void);
+void displaySorted(enum SortField field);
 int findBySapId(int sapId);
+int selectStudentBySapId(const char *prompt);
 float calculateCGPA(const struct StudentInfo *student);
 
 static void discardInputLine(void);
@@ -118,10 +125,10 @@ int main(void) {
       deleteStudentRecord();
       break;
     case 8:
-      displaySortedBySapId();
+      displaySorted(SORT_BY_SAP_ID);
       break;
     case 9:
-      displaySortedByName();
+      displaySorted(SORT_BY_NAME);
       break;
     }
 
@@ -292,6 +299,22 @@ int findBySapId(int sapId) {
   return -1;
 }
 
+/* Asks for a SAP ID and returns its index, or -1 if it is not found or the
+   input is cancelled. The not-found message is printed here. */
+int selectStudentBySapId(const char *prompt) {
+  long long value;
+  int index;
+
+  if (!readNumber(prompt, SAP_MIN, SAP_MAX, &value)) {
+    return -1;
+  }
+  index = findBySapId((int)value);
+  if (index == -1) {
+    printf("No student found with SAP ID %d.\n", (int)value);
+  }
+  return index;
+}
+
 float calculateCGPA(const struct StudentInfo *student) {
   float total = 0.0f;
   int count = student->Semester;
@@ -323,7 +346,7 @@ void addStudentRecord(void) {
                 sizeof student.name)) {
     return;
   }
-  if (!readNumber("Enter SAP ID: ", 590000000, 590099999, &value)) {
+  if (!readNumber("Enter SAP ID: ", SAP_MIN, SAP_MAX, &value)) {
     return;
   }
   if (findBySapId((int)value) != -1) {
@@ -432,25 +455,18 @@ void searchStudentRecord(void) {
 }
 
 void searchBySapId(void) {
-  long long value;
-  int index;
+  int index = selectStudentBySapId("Enter SAP ID to search: ");
 
-  if (!readNumber("Enter SAP ID to search: ", 590000000, 590099999, &value)) {
-    return;
+  if (index != -1) {
+    displayStudent(&studentrecords[index]);
   }
-  index = findBySapId((int)value);
-  if (index == -1) {
-    printf("No student found with SAP ID %d.\n", (int)value);
-    return;
-  }
-  displayStudent(&studentrecords[index]);
 }
 
 void searchByName(void) {
   char query[100];
   int matches = 0;
 
-  if (!readLine("Enter name or beginning of name: ", query, sizeof query)) {
+  if (!readLine("Enter name of the Student: ", query, sizeof query)) {
     return;
   }
   for (int i = 0; i < RecordCount; i++) {
@@ -467,15 +483,9 @@ void searchByName(void) {
 }
 
 void displayCGPA(void) {
-  long long value;
-  int index;
+  int index = selectStudentBySapId("Enter SAP ID: ");
 
-  if (!readNumber("Enter SAP ID: ", 590000000, 590099999, &value)) {
-    return;
-  }
-  index = findBySapId((int)value);
   if (index == -1) {
-    printf("No student found with SAP ID %d.\n", (int)value);
     return;
   }
   printf("CGPA of %s is %.2f\n", studentrecords[index].name,
@@ -510,16 +520,10 @@ void academicAdvisor(float cgpa) {
 }
 
 void showAcademicAdvisor(void) {
-  long long value;
-  int index;
+  int index = selectStudentBySapId("Enter SAP ID for advice: ");
   float cgpa;
 
-  if (!readNumber("Enter SAP ID for advice: ", 590000000, 590099999, &value)) {
-    return;
-  }
-  index = findBySapId((int)value);
   if (index == -1) {
-    printf("No student found with SAP ID %d.\n", (int)value);
     return;
   }
 
@@ -554,15 +558,9 @@ void displayAverageCGPAByYear(void) {
 }
 
 void deleteStudentRecord(void) {
-  long long value;
-  int index;
+  int index = selectStudentBySapId("Enter SAP ID to delete: ");
 
-  if (!readNumber("Enter SAP ID to delete: ", 590000000, 590099999, &value)) {
-    return;
-  }
-  index = findBySapId((int)value);
   if (index == -1) {
-    printf("No student found with SAP ID %d.\n", (int)value);
     return;
   }
 
@@ -576,8 +574,9 @@ void deleteStudentRecord(void) {
   printf("Record deleted successfully.\n");
 }
 
-void displaySortedBySapId(void) {
+void displaySorted(enum SortField field) {
   const struct StudentInfo *sorted[MAX_STUDENTS];
+  int swap;
 
   if (RecordCount == 0) {
     printf("No student records found.\n");
@@ -590,34 +589,12 @@ void displaySortedBySapId(void) {
   /* Sort a copy of pointers so the stored order remains unchanged. */
   for (int i = 0; i < RecordCount - 1; i++) {
     for (int j = 0; j < RecordCount - 1 - i; j++) {
-      if (sorted[j]->SapId > sorted[j + 1]->SapId) {
-        const struct StudentInfo *temp = sorted[j];
-        sorted[j] = sorted[j + 1];
-        sorted[j + 1] = temp;
+      if (field == SORT_BY_SAP_ID) {
+        swap = sorted[j]->SapId > sorted[j + 1]->SapId;
+      } else {
+        swap = strcmp(sorted[j]->name, sorted[j + 1]->name) > 0;
       }
-    }
-  }
-
-  for (int i = 0; i < RecordCount; i++) {
-    displayStudent(sorted[i]);
-  }
-}
-
-void displaySortedByName(void) {
-  const struct StudentInfo *sorted[MAX_STUDENTS];
-
-  if (RecordCount == 0) {
-    printf("No student records found.\n");
-    return;
-  }
-  for (int i = 0; i < RecordCount; i++) {
-    sorted[i] = &studentrecords[i];
-  }
-
-  /* Sort a copy of pointers so the stored order remains unchanged. */
-  for (int i = 0; i < RecordCount - 1; i++) {
-    for (int j = 0; j < RecordCount - 1 - i; j++) {
-      if (strcmp(sorted[j]->name, sorted[j + 1]->name) > 0) {
+      if (swap) {
         const struct StudentInfo *temp = sorted[j];
         sorted[j] = sorted[j + 1];
         sorted[j + 1] = temp;
