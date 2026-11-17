@@ -46,6 +46,8 @@ void searchByName(void);
 void displayAllRecords(void);
 void displayStudent(const struct StudentInfo *student);
 void displayCGPA(void);
+void academicAdvisor(float cgpa);
+void showAcademicAdvisor(void);
 void displayAverageCGPAByYear(void);
 void deleteStudentRecord(void);
 void displaySortedBySapId(void);
@@ -80,15 +82,16 @@ int main(void) {
     printf("3. Display All Student Records\n");
     printf("4. Calculate Student CGPA\n");
     printf("5. Display Average CGPA by Year\n");
-    printf("6. Delete Student Record\n");
-    printf("7. Display Records Sorted by SAP ID\n");
-    printf("8. Display Records Sorted by Name\n");
-    printf("9. Exit\n\n");
+    printf("6. Academic Advisor\n");
+    printf("7. Delete Student Record\n");
+    printf("8. Display Records Sorted by SAP ID\n");
+    printf("9. Display Records Sorted by Name\n");
+    printf("10. Exit\n\n");
 
-    if (!readNumber("Enter your choice: ", 1, 9, &choice)) {
+    if (!readNumber("Enter your choice: ", 1, 10, &choice)) {
       break;
     }
-    if (choice == 9) {
+    if (choice == 10) {
       break;
     }
 
@@ -109,12 +112,15 @@ int main(void) {
       displayAverageCGPAByYear();
       break;
     case 6:
-      deleteStudentRecord();
+      showAcademicAdvisor();
       break;
     case 7:
-      displaySortedBySapId();
+      deleteStudentRecord();
       break;
     case 8:
+      displaySortedBySapId();
+      break;
+    case 9:
       displaySortedByName();
       break;
     }
@@ -474,6 +480,57 @@ void displayCGPA(void) {
   }
   printf("CGPA of %s is %.2f\n", studentrecords[index].name,
          calculateCGPA(&studentrecords[index]));
+}
+
+/* Decision rules for the AI-assisted advisor. The categories were designed
+   during development and are applied here with ordinary if-else statements. */
+void academicAdvisor(float cgpa) {
+  if (cgpa < 0.0f || cgpa > 10.0f) {
+    printf("Cannot give advice: CGPA is outside the valid range.\n");
+    return;
+  }
+
+  if (cgpa >= 8.5f) {
+    printf("Performance Category: Excellent Performance\n");
+    printf("Recommendation: Maintain your current study pattern and "
+           "consistency.\n");
+  } else if (cgpa >= 7.0f) {
+    printf("Performance Category: Good Performance\n");
+    printf("Recommendation: Continue your current efforts and focus on weaker "
+           "subjects.\n");
+  } else if (cgpa >= 5.0f) {
+    printf("Performance Category: Needs Improvement\n");
+    printf("Recommendation: Focus more on subjects with lower SGPA and revise "
+           "regularly.\n");
+  } else {
+    printf("Performance Category: Requires Immediate Attention\n");
+    printf("Recommendation: Strengthen fundamental concepts and seek academic "
+           "support where needed.\n");
+  }
+}
+
+void showAcademicAdvisor(void) {
+  long long value;
+  int index;
+  float cgpa;
+
+  if (!readNumber("Enter SAP ID for advice: ", 590000000, 590099999, &value)) {
+    return;
+  }
+  index = findBySapId((int)value);
+  if (index == -1) {
+    printf("No student found with SAP ID %d.\n", (int)value);
+    return;
+  }
+
+  cgpa = calculateCGPA(&studentrecords[index]);
+  printf("----------------------------------------\n");
+  printf("AI-Assisted Academic Advisor\n");
+  printf("----------------------------------------\n");
+  printf("Student: %s\n", studentrecords[index].name);
+  printf("SAP ID : %d\n", studentrecords[index].SapId);
+  printf("CGPA   : %.2f\n\n", cgpa);
+  academicAdvisor(cgpa);
 }
 
 void displayAverageCGPAByYear(void) {
