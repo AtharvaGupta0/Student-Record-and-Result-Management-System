@@ -151,9 +151,3 @@ records, since names are not unique. The sorted displays use bubble sort on a
 local array of pointers, so the records in memory and in the file stay in the
 order they were added.
 
-## Limitations
-
-- Console application, with one user at a time
-- A record cannot be edited; it has to be deleted and added again
-- Maximum of 1000 records
-- No login or access control
