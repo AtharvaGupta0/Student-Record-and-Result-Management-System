@@ -1,25 +1,159 @@
 # Student Record and Result Management System
 
-A console-based student record and result management system written in C.
+A menu-driven console application in C for keeping student records and semester
+results. It was written as a college C programming project and uses only the
+standard C library.
+
+Records are stored in a binary file, so the data is still there the next time
+the program is opened.
 
 ## Features
 
-- Add student records with SAP ID, roll number, name, phone, email, year,
-  semester and SGPA results
-- Search by SAP ID or by name (case-insensitive prefix search)
-- Delete a student record
-- Display all records, or display them sorted by SAP ID or by name
-- Calculate a student's CGPA and the average CGPA of each year
-- Records are saved in `DataFiles/students.dat` using binary file handling
+- Add a student record with SAP ID, roll number, name, phone number, email ID,
+  year, semester and SGPA for the semesters completed so far
+- Search by SAP ID, or by name using a case-insensitive prefix
+- Display all records
+- Display all records sorted by SAP ID or by name, without changing the order
+  stored in the file
+- Calculate the CGPA of any student
+- Calculate the average CGPA of the students in each year
+- Delete a record
+- Save every change to `DataFiles/students.dat`
 
-## Build and run
+## Project layout
 
-From the repository root:
+```
+Student-Record-and-Result-Management-System/
+├── Code/
+│   └── main.c
+├── DataFiles/
+│   └── students.dat
+├── Executables/
+│   ├── Student-Record-and-Management-System      (Linux)
+│   └── Student-Record-and-Management-System.exe  (Windows)
+└── README.md
+```
+
+## Requirements
+
+- A C compiler that supports C11, such as GCC, Clang, or MinGW on Windows
+- No external libraries
+
+## Building
+
+### Linux
+
+From the project root:
 
 ```bash
 gcc -std=c11 -Wall -Wextra Code/main.c -o Executables/Student-Record-and-Management-System
+```
+
+### Windows
+
+Using MinGW-w64, for example from the MSYS2 UCRT64 shell, run this from the
+project root:
+
+```cmd
+gcc -std=c11 -Wall -Wextra Code/main.c -o Executables\Student-Record-and-Management-System.exe
+```
+
+Both builds are already included in `Executables/`, so compiling is only needed
+after changing the source.
+
+## Running
+
+Run the program from the project root. The path to the data file is relative,
+so starting it from inside `Executables/`, or by double-clicking the `.exe`,
+means it cannot find `DataFiles/students.dat`.
+
+Linux:
+
+```bash
 ./Executables/Student-Record-and-Management-System
 ```
 
-Run the program from the repository root because the data file path is
-relative to the working directory.
+Windows PowerShell:
+
+```powershell
+.\Executables\Student-Record-and-Management-System.exe
+```
+
+Windows cmd:
+
+```cmd
+Executables\Student-Record-and-Management-System.exe
+```
+
+## Menu
+
+```
+========================================
+ Student Record and Result Management
+========================================
+1. Add Student Record
+2. Search Student Record
+3. Display All Student Records
+4. Calculate Student CGPA
+5. Display Average CGPA by Year
+6. Delete Student Record
+7. Display Records Sorted by SAP ID
+8. Display Records Sorted by Name
+9. Exit
+```
+
+Option 2 opens a smaller search menu with SAP ID search, name search and a
+return option. After an operation finishes, the program goes back to the main
+menu. Invalid input is rejected and asked for again instead of ending the
+program.
+
+## Fields and validation
+
+| Field    | Rule                                                          |
+|----------|---------------------------------------------------------------|
+| SAP ID   | `590000000` to `590099999`, and must be unique                |
+| Roll No. | `1` to `100`                                                  |
+| Name     | May contain spaces                                            |
+| Phone    | 10 digits                                                     |
+| Email    | Basic check for a name, `@`, and a domain with a dot          |
+| Year     | `1` to `4`                                                    |
+| Semester | 1–2 in first year, 3–4 in second, 5–6 in third, 7–8 in fourth |
+| SGPA     | `0.0` to `10.0`                                               |
+
+Only the semesters up to the student's current semester are asked for, and the
+remaining SGPA slots are left at zero. CGPA is the average of the SGPA values
+that are actually available, not the average of all eight slots.
+
+Name search only matches from the beginning of a name, so `atha` finds
+`Atharva Gupta`, but `Gupta` does not. The comparison is case-insensitive.
+
+## About the data file
+
+`DataFiles/students.dat` is written with `fwrite`, one fixed-size
+`struct StudentInfo` per record, and read back with `fread`. It is loaded when
+the program starts and rewritten after every add or delete. Up to 1000 records
+are kept in memory.
+
+The repository already contains some example records so the menu can be tried
+straight away. Delete the file to start with an empty database; it is created
+again on the next save.
+
+Because the file stores the raw structure, changing the fields of
+`struct StudentInfo` makes existing data files unreadable. That is acceptable
+for a project of this size, but the data file has to be regenerated after such
+a change.
+
+## Sorting and searching
+
+SAP ID search is a linear search because records are not kept in sorted order.
+Name search checks the beginning of each name and continues through all
+records, since names are not unique. The sorted displays use bubble sort on a
+local array of pointers, so the records in memory and in the file stay in the
+order they were added.
+
+## Limitations
+
+- Console application, with one user at a time
+- A record cannot be edited; it has to be deleted and added again
+- Maximum of 1000 records
+- No login or access control
