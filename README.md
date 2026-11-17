@@ -17,6 +17,7 @@ the program is opened.
   stored in the file
 - Calculate the CGPA of any student
 - Calculate the average CGPA of the students in each year
+- Get an academic recommendation for a student from the AI-assisted advisor
 - Delete a record
 - Save every change to `DataFiles/students.dat`
 
@@ -31,6 +32,7 @@ Student-Record-and-Result-Management-System/
 ├── Executables/
 │   ├── Student-Record-and-Management-System      (Linux)
 │   └── Student-Record-and-Management-System.exe  (Windows)
+├── AI_USAGE_LOG.md
 └── README.md
 ```
 
@@ -96,16 +98,65 @@ Executables\Student-Record-and-Management-System.exe
 3. Display All Student Records
 4. Calculate Student CGPA
 5. Display Average CGPA by Year
-6. Delete Student Record
-7. Display Records Sorted by SAP ID
-8. Display Records Sorted by Name
-9. Exit
+6. Academic Advisor
+7. Delete Student Record
+8. Display Records Sorted by SAP ID
+9. Display Records Sorted by Name
+10. Exit
 ```
 
 Option 2 opens a smaller search menu with SAP ID search, name search and a
 return option. After an operation finishes, the program goes back to the main
 menu. Invalid input is rejected and asked for again instead of ending the
 program.
+
+## AI-Assisted Academic Advisor
+
+Option 6 asks for a SAP ID, calculates that student's CGPA from the stored SGPA
+values, and prints a performance category with a short recommendation.
+
+AI was used during development to help design the performance categories and
+the recommendation wording. The final implementation is a deterministic C
+function using CGPA and `if-else` statements; no AI model is executed by the
+application. It needs no internet connection, API key or external service.
+
+The categories are rules chosen for this mini project, not an official
+university grading policy:
+
+| CGPA              | Category                     | Recommendation                                                        |
+|-------------------|------------------------------|-----------------------------------------------------------------------|
+| 8.5 to 10.0       | Excellent Performance        | Maintain your current study pattern and consistency.                   |
+| 7.0 to below 8.5  | Good Performance             | Continue your current efforts and focus on weaker subjects.            |
+| 5.0 to below 7.0  | Needs Improvement            | Focus more on subjects with lower SGPA and revise regularly.           |
+| Below 5.0         | Requires Immediate Attention | Strengthen fundamental concepts and seek academic support where needed. |
+
+Example output, calculated from the stored record:
+
+```
+----------------------------------------
+AI-Assisted Academic Advisor
+----------------------------------------
+Student: Priya Nair
+SAP ID : 590000105
+CGPA   : 8.80
+
+Performance Category: Excellent Performance
+Recommendation: Maintain your current study pattern and consistency.
+```
+
+The sample records in `DataFiles/students.dat` cover all four categories, so the
+feature can be demonstrated without adding anything:
+
+| Student     | SAP ID    | CGPA | Category                     |
+|-------------|-----------|------|------------------------------|
+| Priya Nair  | 590000105 | 8.80 | Excellent Performance        |
+| Arjun Reddy | 590000110 | 7.85 | Good Performance             |
+| Meera Joshi | 590000111 | 6.20 | Needs Improvement            |
+| Rahul Das   | 590000112 | 4.70 | Requires Immediate Attention |
+
+These values are calculated by the program from each student's SGPA values; no
+CGPA is stored or hard-coded. See `AI_USAGE_LOG.md` for the record of AI
+assistance during the project.
 
 ## Fields and validation
 
